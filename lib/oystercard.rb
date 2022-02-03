@@ -1,7 +1,7 @@
 require_relative "journey"
 
 class Oystercard
-  attr_reader :balance, :in_journey, :entry_station, :exit_station, :list_of_journeys, :journeys
+  attr_reader :balance, :list_of_journeys, :journey_started
 
   MAX_BALANCE = 90
   MIN_BALANCE = 1
@@ -9,10 +9,8 @@ class Oystercard
 
   def initialize
     @balance = 0
-    @entry_station = nil
-    @exit_station = nil
     @list_of_journeys = []
-    @journey = {}
+    @journey_started = []
   end
 
   def top_up(value)
@@ -21,23 +19,30 @@ class Oystercard
   end
 
   def in_journey?
-    !!@entry_station
+    true if @entry_station
   end
 
-  def touch_in(station)
+  def touch_in(station, class_of_journey = Journey)
     fail 'Card has less than minimum balance' unless balance >= MIN_BALANCE
-    @exit_station = nil
-    @entry_station = station
+    current_journey = class_of_journey.new(station, nil)
+    p current_journey
+    @journey_started << current_journey
+    deduct(current_journey.fare)
   end
 
   def touch_out(station)
-    deduct(MIN_FARE)
-    @exit_station = station
-    # list_of_journeys << { @entry_station => @exit_station }
-    @journey[:entry_station] = @entry_station
-    @journey[:exit_station] = @exit_station
-    list_of_journeys << @journey
-    @entry_station = nil
+    if @journey_started.empty? 
+      journey_not_touched_in = class_of_journey.new(nil, station)
+      @list_of_journeys << journey_not_touched_in
+      deduct(journey_not_touched_in.fare)
+    else
+      calculate_actual_fare = JOURNEY::PENALTY_FARE - JOURNEY::MIN_FARE
+      finished_journey = @journey_started[0]
+      @journey_started = []
+      finished_journey.finish(finished_journey.entry_station, station, (finished_journey.fare - calculate_actual_fare))
+      @list_of_journeys << finished_journey
+      deduct(- calculate_actual_fare)
+    end
   end
 
   private
@@ -45,4 +50,5 @@ class Oystercard
   def deduct(value)
     @balance -= value
   end
+
 end

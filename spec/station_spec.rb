@@ -2,18 +2,18 @@ require 'station.rb'
 
 describe Station do
 
-    before(:all) do
-        @station = Station.new(name = "Victoria", zone = 1)
-      end
+  let(:name) { "Victoria "}
+  let(:zone) { 1 }
+  let(:station) { Station.new(name, zone) } 
 
   describe "#station" do
 
     it "returns station name" do
-      expect(@station.name).to eq("Victoria")
+      expect(station.name).to eq name
     end
 
     it "returns station zone" do
-      expect(@station.zone).to eq(1)
+      expect(station.zone).to eq zone
     end
 
   end 
