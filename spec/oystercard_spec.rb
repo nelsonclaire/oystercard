@@ -69,10 +69,5 @@ describe Oystercard do
       expect { subject.touch_in(entry_station) }.to raise_error('Card has less than minimum balance')
     end
 
-    it 'should touch out minimum fare' do
-      subject.top_up(Oystercard::MIN_BALANCE)
-      subject.touch_in(entry_station)
-      expect { subject.touch_out(exit_station) }.to change { subject.balance }.by(-Oystercard::MIN_FARE)
-    end
   end
 end
